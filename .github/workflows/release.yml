@@ -50,7 +50,7 @@ jobs:
         env:
           GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
         run: |
-          index="$(ls dist/*_index.xcl)"
+          index="$(ls dist/*-index.xcl)"
           gpg --batch --yes --pinentry-mode loopback --passphrase "$GPG_PASSPHRASE" \
             --armor --detach-sign --output "$index.sig" "$index"
 

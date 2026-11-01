@@ -62,16 +62,18 @@ external:
 	go test -v -count=1 -run TestExternal ./e2e
 
 # Build the release into dist/, in the layout the GitHub registry installs:
-# for each platform <PLUGIN>_<version>_<os>_<arch>.zip holding the binary,
+# for each platform <PLUGIN>-<version>-<os>-<arch>.zip holding the binary,
 # README, LICENSE and the build's xcl-plugin.xcl manifest at its root, and
-# <PLUGIN>_<version>_index.xcl listing every zip with its sha256 checksum.
+# <PLUGIN>-<version>-index.xcl listing every zip with its sha256 checksum.
+# The names are separated with -, like the repository's name; the registry
+# also accepts _ used throughout.
 # It uses only go, zip and sha256sum, and signs nothing: the release workflow
 # signs the index.
 dist: check-version
 	rm -rf $(DIST_DIR)
 	mkdir -p $(DIST_DIR)
 	@set -e; \
-	index="$(DIST_DIR)/$(PLUGIN)_$(DIST_VERSION)_index.xcl"; \
+	index="$(DIST_DIR)/$(PLUGIN)-$(DIST_VERSION)-index.xcl"; \
 	platforms=""; \
 	for platform in $(PLATFORMS); do \
 		os=$${platform%_*}; arch=$${platform#*_}; \
@@ -82,7 +84,7 @@ dist: check-version
 		cp README.md LICENSE "$$stage/"; \
 		printf 'plugin {\n  name    = "%s"\n  version = "%s"\n}\n\nexecutable {\n  protocol = [1]\n  command  = ["%s"]\n\n  platform "%s" "%s" {}\n}\n' \
 			"$(PLUGIN)" "$(DIST_VERSION)" "$(PLUGIN)$$ext" "$$os" "$$arch" > "$$stage/xcl-plugin.xcl"; \
-		archive="$(PLUGIN)_$(DIST_VERSION)_$$platform.zip"; \
+		archive="$(PLUGIN)-$(DIST_VERSION)-$$os-$$arch.zip"; \
 		(cd "$$stage" && zip -q -X "../../$$archive" *); \
 		checksum=$$(sha256sum "$(DIST_DIR)/$$archive" | cut -d' ' -f1); \
 		platforms="$$platforms$$(printf '\n  platform "%s" "%s" {\n    asset    = "%s"\n    checksum = "sha256:%s"\n  }\n' "$$os" "$$arch" "$$archive" "$$checksum")\n"; \

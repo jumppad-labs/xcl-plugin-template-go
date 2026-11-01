@@ -329,15 +329,21 @@ Tags the current commit and pushes the tag. The release workflow
 release with `gh`. With `PLUGIN` set to your repository's name, the release
 holds:
 
-- `<PLUGIN>_0.1.0_<os>_<arch>.zip` for linux, darwin and windows on amd64 and
+- `<PLUGIN>-0.1.0-<os>-<arch>.zip` for linux, darwin and windows on amd64 and
   arm64, each with the binary at its root (`.exe` on windows), beside
   `README.md`, `LICENSE` and `xcl-plugin.xcl`, the build's manifest naming
   the plugin, its version, the protocol it speaks, the command to run and its
   platform;
-- `<PLUGIN>_0.1.0_index.xcl`, the index listing every zip with its platform
+- `<PLUGIN>-0.1.0-index.xcl`, the index listing every zip with its platform
   and its `sha256:` checksum;
-- `<PLUGIN>_0.1.0_index.xcl.sig`, an armoured detached signature over the
+- `<PLUGIN>-0.1.0-index.xcl.sig`, an armoured detached signature over the
   index.
+
+The parts of each name are separated with `-`, like the repository's name.
+xcl's GitHub registry also installs releases that use `_` throughout
+(`<PLUGIN>_0.1.0_index.xcl`), so change the separators in `make dist` if you
+prefer that. Installing a `-`-separated release needs an xcl newer than
+v0.13.0, which only finds `_`-separated indexes.
 
 To build the same release locally, unsigned:
 
