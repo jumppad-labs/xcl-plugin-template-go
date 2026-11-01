@@ -165,14 +165,22 @@ var ReplaceSettings = []entity.Path{
 }
 ```
 
+`NewNoteProvider` hands the list to xcl's `DefaultChanged` as its `ReplaceOn`
+settings:
+
+```go
+DefaultChanged: plugins.DefaultChanged[*entities.Note]{ReplaceOn: ReplaceSettings},
+```
+
 `Changed` reads in a fixed order:
 
-1. a change `Within` any of `ReplaceSettings` answers **replace**: moving the
-   file means removing the old one and writing a new one;
-2. a dependency that is being replaced answers **replace**. A resource built
+1. a dependency that is being replaced answers **replace**. A resource built
    on another type narrows this to that type's dependencies;
-3. any other change answers **update**;
-4. with no changes, it defers to `DefaultChanged`.
+2. it defers to `DefaultChanged`, where a change `Within` any of
+   `ReplaceSettings` answers **replace**: moving the file means removing the
+   old one and writing a new one;
+3. any other change answers **update**, and with no changes `DefaultChanged`
+   compares the resources.
 
 To change what needs a replace, edit the list, not the logic. The unit tests
 have one function per rule, and `e2e/changes_test.go` shows the same outcome
@@ -316,34 +324,37 @@ make release VERSION=v0.1.0
 ```
 
 Tags the current commit and pushes the tag. The release workflow
-(`.github/workflows/release.yml`) runs the tests, builds the archives with
-`make dist`, imports the signing key, signs the checksums file and publishes
-the release with `gh`. With `PLUGIN` set to your repository's name, the
-release holds:
+(`.github/workflows/release.yml`) runs the tests, builds the release with
+`make dist`, imports the signing key, signs the index and publishes the
+release with `gh`. With `PLUGIN` set to your repository's name, the release
+holds:
 
-- `<PLUGIN>_0.1.0_<os>_<arch>.tar.gz` for linux and darwin, and
-  `<PLUGIN>_0.1.0_windows_<arch>.zip`, on amd64 and arm64, each with the
-  binary at its root, beside `README.md` and `LICENSE`;
-- `<PLUGIN>_0.1.0_checksums.txt`, the SHA-256 of every archive in
-  `sha256sum` format;
-- `<PLUGIN>_0.1.0_checksums.txt.sig`, an armoured detached signature over the
-  checksums file.
+- `<PLUGIN>_0.1.0_<os>_<arch>.zip` for linux, darwin and windows on amd64 and
+  arm64, each with the binary at its root (`.exe` on windows), beside
+  `README.md`, `LICENSE` and `xcl-plugin.xcl`, the build's manifest naming
+  the plugin, its version, the protocol it speaks, the command to run and its
+  platform;
+- `<PLUGIN>_0.1.0_index.xcl`, the index listing every zip with its platform
+  and its `sha256:` checksum;
+- `<PLUGIN>_0.1.0_index.xcl.sig`, an armoured detached signature over the
+  index.
 
-To build the same archives locally, unsigned:
+To build the same release locally, unsigned:
 
 ```shell
 make dist VERSION=v0.0.0-snapshot
 ```
 
 CI runs this on every change, so broken release packaging fails on the change
-that broke it. Release packaging needs only go, tar, zip, sha256sum, gpg and
-gh, all already on GitHub's `ubuntu-latest` runner, so it adds no tool to pin.
+that broke it. Release packaging needs only go, zip, sha256sum, gpg and gh, all already on GitHub's `ubuntu-latest` runner, so it adds no tool to pin.
 
 ## Install
 
 An application installs a released plugin with xcl's GitHub registry, which
-downloads the build for its platform, checks it against the checksums and,
-with a trusted key, the signature, and runs it as a separate program:
+downloads the index and, with a trusted key, checks its signature, then
+downloads only the zip for its platform, checks it against its checksum in
+the index and its manifest against the index, and runs it as a separate
+program:
 
 ```go
 gh := registry.NewGitHub(registry.GitHubTrustedKeys(publicKey))

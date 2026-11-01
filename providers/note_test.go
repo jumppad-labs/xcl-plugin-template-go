@@ -184,6 +184,26 @@ func TestChangedReplacesWhenNameChanges(t *testing.T) {
 	require.Equal(t, entity.Replace, change)
 }
 
+func TestNewNoteProviderReplacesOnReplaceSettings(t *testing.T) {
+	provider := providers.NewNoteProvider(mocks.NewMockFiles(t))
+
+	require.Equal(t, providers.ReplaceSettings, provider.DefaultChanged.ReplaceOn)
+}
+
+func TestChangedReplacesWhenNameChangesBesideContent(t *testing.T) {
+	provider := providers.NewNoteProvider(mocks.NewMockFiles(t))
+
+	changes := []entity.PropertyChange{
+		{Path: entity.Path{}.Attribute("content"), Before: "a", After: "b"},
+		{Path: entity.Path{}.Attribute("name"), Before: "a.txt", After: "b.txt"},
+	}
+
+	change, err := provider.Changed(context.Background(), testNote(), testNote(), changes, nil)
+
+	require.NoError(t, err)
+	require.Equal(t, entity.Replace, change)
+}
+
 func TestChangedReplacesWhenADependencyIsReplaced(t *testing.T) {
 	provider := providers.NewNoteProvider(mocks.NewMockFiles(t))
 
