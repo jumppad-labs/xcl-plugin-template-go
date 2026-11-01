@@ -14,9 +14,9 @@ import (
 	"github.com/jumppad-labs/xcl/logger"
 	"github.com/jumppad-labs/xcl/plugins"
 
-	"github.com/jumppad-labs/xcl-plugin-template/client/files"
-	"github.com/jumppad-labs/xcl-plugin-template/entities"
-	"github.com/jumppad-labs/xcl-plugin-template/providers"
+	"github.com/jumppad-labs/xcl-plugin-template-go/client/files"
+	"github.com/jumppad-labs/xcl-plugin-template-go/entities"
+	"github.com/jumppad-labs/xcl-plugin-template-go/providers"
 )
 
 // Plugin provides the block type notes "note". cmd/notes serves it as a

@@ -15,10 +15,10 @@ import (
 	"github.com/jumppad-labs/xcl/plugins"
 	"github.com/jumppad-labs/xcl/types"
 
-	"github.com/jumppad-labs/xcl-plugin-template/client/files"
-	"github.com/jumppad-labs/xcl-plugin-template/client/files/mocks"
-	"github.com/jumppad-labs/xcl-plugin-template/entities"
-	"github.com/jumppad-labs/xcl-plugin-template/providers"
+	"github.com/jumppad-labs/xcl-plugin-template-go/client/files"
+	"github.com/jumppad-labs/xcl-plugin-template-go/client/files/mocks"
+	"github.com/jumppad-labs/xcl-plugin-template-go/entities"
+	"github.com/jumppad-labs/xcl-plugin-template-go/providers"
 )
 
 func testNote() *entities.Note {
@@ -175,6 +175,26 @@ func TestChangedReplacesWhenNameChanges(t *testing.T) {
 	provider := providers.NewNoteProvider(mocks.NewMockFiles(t))
 
 	changes := []entity.PropertyChange{
+		{Path: entity.Path{}.Attribute("name"), Before: "a.txt", After: "b.txt"},
+	}
+
+	change, err := provider.Changed(context.Background(), testNote(), testNote(), changes, nil)
+
+	require.NoError(t, err)
+	require.Equal(t, entity.Replace, change)
+}
+
+func TestNewNoteProviderReplacesOnReplaceSettings(t *testing.T) {
+	provider := providers.NewNoteProvider(mocks.NewMockFiles(t))
+
+	require.Equal(t, providers.ReplaceSettings, provider.DefaultChanged.ReplaceOn)
+}
+
+func TestChangedReplacesWhenNameChangesBesideContent(t *testing.T) {
+	provider := providers.NewNoteProvider(mocks.NewMockFiles(t))
+
+	changes := []entity.PropertyChange{
+		{Path: entity.Path{}.Attribute("content"), Before: "a", After: "b"},
 		{Path: entity.Path{}.Attribute("name"), Before: "a.txt", After: "b.txt"},
 	}
 

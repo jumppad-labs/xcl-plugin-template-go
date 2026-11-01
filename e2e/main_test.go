@@ -15,7 +15,7 @@ import (
 	"github.com/jumppad-labs/xcl"
 	"github.com/jumppad-labs/xcl/registry"
 
-	notes "github.com/jumppad-labs/xcl-plugin-template"
+	notes "github.com/jumppad-labs/xcl-plugin-template-go"
 )
 
 // basicExample is the directory holding the sample configuration the tests
@@ -30,13 +30,13 @@ const noteAddress = "notes.note.greeting"
 var pluginBinary string
 
 func TestMain(m *testing.M) {
-	buildDir, err := os.MkdirTemp("", "xcl-plugin-template-e2e")
+	buildDir, err := os.MkdirTemp("", "xcl-plugin-template-go-e2e")
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "unable to create build directory: %s\n", err)
 		os.Exit(1)
 	}
 
-	pluginBinary = filepath.Join(buildDir, "xcl-plugin-template")
+	pluginBinary = filepath.Join(buildDir, "xcl-plugin-template-go")
 
 	build := exec.Command("go", "build", "-o", pluginBinary, "../cmd/notes")
 	build.Stdout = os.Stdout

@@ -8,7 +8,7 @@ import (
 	"context"
 	"io/fs"
 
-	"github.com/jumppad-labs/xcl-plugin-template/client/files"
+	"github.com/jumppad-labs/xcl-plugin-template-go/client/files"
 	mock "github.com/stretchr/testify/mock"
 )
 

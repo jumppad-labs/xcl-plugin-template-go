@@ -21,8 +21,8 @@ import (
 	"github.com/jumppad-labs/xcl/logger"
 	"github.com/jumppad-labs/xcl/plugins"
 
-	"github.com/jumppad-labs/xcl-plugin-template/client/files"
-	"github.com/jumppad-labs/xcl-plugin-template/entities"
+	"github.com/jumppad-labs/xcl-plugin-template-go/client/files"
+	"github.com/jumppad-labs/xcl-plugin-template-go/entities"
 )
 
 // ReplaceSettings are the note settings that cannot change in place: changing
@@ -51,7 +51,8 @@ var _ plugins.ResourceProvider[*entities.Note] = (*NoteProvider)(nil)
 // here, so Functions only returns them.
 func NewNoteProvider(filesClient files.Files) *NoteProvider {
 	return &NoteProvider{
-		files: filesClient,
+		DefaultChanged: plugins.DefaultChanged[*entities.Note]{ReplaceOn: ReplaceSettings},
+		files:          filesClient,
 		functions: plugins.NewFunctions(map[string]plugins.ProviderFunction{
 			"note_filename": mustFunction(noteFilename),
 		}),
@@ -104,18 +105,11 @@ func (p *NoteProvider) Read(ctx context.Context, old *entities.Note, new *entiti
 	return new, nil
 }
 
-// Changed decides from what it is told. It answers replace when a setting in
-// ReplaceSettings changed or a dependency is being replaced, update when any
-// other setting changed, and leaves the rest to DefaultChanged.
+// Changed decides from what it is told. It answers replace when a dependency
+// is being replaced, and otherwise defers to DefaultChanged, which answers
+// replace when a setting in ReplaceSettings changed. Any other setting
+// changing is an update, even when the resources compare equal.
 func (p *NoteProvider) Changed(ctx context.Context, old *entities.Note, new *entities.Note, changes []entity.PropertyChange, dependencies []entity.DependencyChange) (entity.Change, error) {
-	for _, change := range changes {
-		for _, setting := range ReplaceSettings {
-			if change.Within(setting) {
-				return entity.Replace, nil
-			}
-		}
-	}
-
 	// A note is rebuilt when anything it depends on is replaced. A resource
 	// that is built on another type would narrow this to that type, for
 	// example by checking the dependency's Address.
@@ -125,11 +119,16 @@ func (p *NoteProvider) Changed(ctx context.Context, old *entities.Note, new *ent
 		}
 	}
 
-	if len(changes) > 0 {
+	change, err := p.DefaultChanged.Changed(ctx, old, new, changes, dependencies)
+	if err != nil {
+		return entity.NoChange, err
+	}
+
+	if change == entity.NoChange && len(changes) > 0 {
 		return entity.Update, nil
 	}
 
-	return p.DefaultChanged.Changed(ctx, old, new, changes, dependencies)
+	return change, nil
 }
 
 // Update acts only on the changes it is given. A content change rewrites the

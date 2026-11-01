@@ -28,7 +28,7 @@ Click **Use this template** on GitHub, or create your repository with the
 GitHub CLI:
 
 ```shell
-gh repo create <you>/xcl-plugin-<name> --template jumppad-labs/xcl-plugin-template --public --clone
+gh repo create <you>/xcl-plugin-<name> --template jumppad-labs/xcl-plugin-template-go --public --clone
 cd xcl-plugin-<name>
 ```
 
@@ -43,7 +43,7 @@ and run `make test` after each:
 
 1. **Module path.** Change `module` in `go.mod` to your repository, for
    example `github.com/<you>/xcl-plugin-<name>`, then replace
-   `github.com/jumppad-labs/xcl-plugin-template` with it in every import
+   `github.com/jumppad-labs/xcl-plugin-template-go` with it in every import
    and in `.mockery.yml`.
 2. **Plugin name.** Set `PLUGIN` at the top of the `Makefile` to your
    repository's name. It names the binary and every release asset.
@@ -150,7 +150,7 @@ local.RegisterExternalPlugin(pluginBinary)
 ```
 
 `pluginBinary` is the path of the built program, for example
-`build/xcl-plugin-template`.
+`build/xcl-plugin-template-go`.
 
 ## The change decision
 
@@ -165,14 +165,22 @@ var ReplaceSettings = []entity.Path{
 }
 ```
 
+`NewNoteProvider` hands the list to xcl's `DefaultChanged` as its `ReplaceOn`
+settings:
+
+```go
+DefaultChanged: plugins.DefaultChanged[*entities.Note]{ReplaceOn: ReplaceSettings},
+```
+
 `Changed` reads in a fixed order:
 
-1. a change `Within` any of `ReplaceSettings` answers **replace**: moving the
-   file means removing the old one and writing a new one;
-2. a dependency that is being replaced answers **replace**. A resource built
+1. a dependency that is being replaced answers **replace**. A resource built
    on another type narrows this to that type's dependencies;
-3. any other change answers **update**;
-4. with no changes, it defers to `DefaultChanged`.
+2. it defers to `DefaultChanged`, where a change `Within` any of
+   `ReplaceSettings` answers **replace**: moving the file means removing the
+   old one and writing a new one;
+3. any other change answers **update**, and with no changes `DefaultChanged`
+   compares the resources.
 
 To change what needs a replace, edit the list, not the logic. The unit tests
 have one function per rule, and `e2e/changes_test.go` shows the same outcome
@@ -316,34 +324,43 @@ make release VERSION=v0.1.0
 ```
 
 Tags the current commit and pushes the tag. The release workflow
-(`.github/workflows/release.yml`) runs the tests, builds the archives with
-`make dist`, imports the signing key, signs the checksums file and publishes
-the release with `gh`. With `PLUGIN` set to your repository's name, the
-release holds:
+(`.github/workflows/release.yml`) runs the tests, builds the release with
+`make dist`, imports the signing key, signs the index and publishes the
+release with `gh`. With `PLUGIN` set to your repository's name, the release
+holds:
 
-- `<PLUGIN>_0.1.0_<os>_<arch>.tar.gz` for linux and darwin, and
-  `<PLUGIN>_0.1.0_windows_<arch>.zip`, on amd64 and arm64, each with the
-  binary at its root, beside `README.md` and `LICENSE`;
-- `<PLUGIN>_0.1.0_checksums.txt`, the SHA-256 of every archive in
-  `sha256sum` format;
-- `<PLUGIN>_0.1.0_checksums.txt.sig`, an armoured detached signature over the
-  checksums file.
+- `<PLUGIN>-0.1.0-<os>-<arch>.zip` for linux, darwin and windows on amd64 and
+  arm64, each with the binary at its root (`.exe` on windows), beside
+  `README.md`, `LICENSE` and `xcl-plugin.xcl`, the build's manifest naming
+  the plugin, its version, the protocol it speaks, the command to run and its
+  platform;
+- `<PLUGIN>-0.1.0-index.xcl`, the index listing every zip with its platform
+  and its `sha256:` checksum;
+- `<PLUGIN>-0.1.0-index.xcl.sig`, an armoured detached signature over the
+  index.
 
-To build the same archives locally, unsigned:
+The parts of each name are separated with `-`, like the repository's name.
+xcl's GitHub registry also installs releases that use `_` throughout
+(`<PLUGIN>_0.1.0_index.xcl`), so change the separators in `make dist` if you
+prefer that. Installing a `-`-separated release needs xcl v0.13.1 or later;
+earlier versions only find `_`-separated indexes.
+
+To build the same release locally, unsigned:
 
 ```shell
 make dist VERSION=v0.0.0-snapshot
 ```
 
 CI runs this on every change, so broken release packaging fails on the change
-that broke it. Release packaging needs only go, tar, zip, sha256sum, gpg and
-gh, all already on GitHub's `ubuntu-latest` runner, so it adds no tool to pin.
+that broke it. Release packaging needs only go, zip, sha256sum, gpg and gh, all already on GitHub's `ubuntu-latest` runner, so it adds no tool to pin.
 
 ## Install
 
 An application installs a released plugin with xcl's GitHub registry, which
-downloads the build for its platform, checks it against the checksums and,
-with a trusted key, the signature, and runs it as a separate program:
+downloads the index and, with a trusted key, checks its signature, then
+downloads only the zip for its platform, checks it against its checksum in
+the index and its manifest against the index, and runs it as a separate
+program:
 
 ```go
 gh := registry.NewGitHub(registry.GitHubTrustedKeys(publicKey))
@@ -383,7 +400,7 @@ if err != nil {
 }
 
 gh := registry.NewGitHub(registry.GitHubTrustedKeys(string(publicKey)))
-gh.RegisterPlugin("jumppad-labs/xcl-plugin-template", "v0.1.0")
+gh.RegisterPlugin("jumppad-labs/xcl-plugin-template-go", "v0.1.0")
 ```
 
 ## Tools and why
