@@ -13,6 +13,6 @@ template: testify
 template-data:
   unroll-variadic: true
 packages:
-  github.com/jumppad-labs/xcl-plugin-template/client/files:
+  github.com/jumppad-labs/xcl-plugin-template-go/client/files:
     interfaces:
       Files: {}

@@ -9,7 +9,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/jumppad-labs/xcl-plugin-template/client/files"
+	"github.com/jumppad-labs/xcl-plugin-template-go/client/files"
 )
 
 // helloChecksum is the sha256 of the bytes "hello"

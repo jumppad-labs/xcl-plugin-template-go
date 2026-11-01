@@ -15,10 +15,10 @@ import (
 	"github.com/jumppad-labs/xcl/plugins"
 	"github.com/jumppad-labs/xcl/types"
 
-	"github.com/jumppad-labs/xcl-plugin-template/client/files"
-	"github.com/jumppad-labs/xcl-plugin-template/client/files/mocks"
-	"github.com/jumppad-labs/xcl-plugin-template/entities"
-	"github.com/jumppad-labs/xcl-plugin-template/providers"
+	"github.com/jumppad-labs/xcl-plugin-template-go/client/files"
+	"github.com/jumppad-labs/xcl-plugin-template-go/client/files/mocks"
+	"github.com/jumppad-labs/xcl-plugin-template-go/entities"
+	"github.com/jumppad-labs/xcl-plugin-template-go/providers"
 )
 
 func testNote() *entities.Note {

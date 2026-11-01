@@ -8,7 +8,7 @@ package main
 import (
 	"github.com/jumppad-labs/xcl/plugins"
 
-	notes "github.com/jumppad-labs/xcl-plugin-template"
+	notes "github.com/jumppad-labs/xcl-plugin-template-go"
 )
 
 // main serves the plugin to the host that started this process

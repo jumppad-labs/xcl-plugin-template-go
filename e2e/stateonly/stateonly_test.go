@@ -15,7 +15,7 @@ import (
 	"github.com/jumppad-labs/xcl"
 	"github.com/jumppad-labs/xcl/registry"
 
-	"github.com/jumppad-labs/xcl-plugin-template/entities"
+	"github.com/jumppad-labs/xcl-plugin-template-go/entities"
 )
 
 // basicExample is the directory holding the sample configuration the test
@@ -27,13 +27,13 @@ const basicExample = "../../examples/basic"
 var pluginBinary string
 
 func TestMain(m *testing.M) {
-	buildDir, err := os.MkdirTemp("", "xcl-plugin-template-stateonly")
+	buildDir, err := os.MkdirTemp("", "xcl-plugin-template-go-stateonly")
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "unable to create build directory: %s\n", err)
 		os.Exit(1)
 	}
 
-	pluginBinary = filepath.Join(buildDir, "xcl-plugin-template")
+	pluginBinary = filepath.Join(buildDir, "xcl-plugin-template-go")
 
 	build := exec.Command("go", "build", "-o", pluginBinary, "../../cmd/notes")
 	build.Stdout = os.Stdout

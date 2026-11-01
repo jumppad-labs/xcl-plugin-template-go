@@ -1,4 +1,4 @@
-module github.com/jumppad-labs/xcl-plugin-template
+module github.com/jumppad-labs/xcl-plugin-template-go
 
 go 1.25.0
 

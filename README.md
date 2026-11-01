@@ -28,7 +28,7 @@ Click **Use this template** on GitHub, or create your repository with the
 GitHub CLI:
 
 ```shell
-gh repo create <you>/xcl-plugin-<name> --template jumppad-labs/xcl-plugin-template --public --clone
+gh repo create <you>/xcl-plugin-<name> --template jumppad-labs/xcl-plugin-template-go --public --clone
 cd xcl-plugin-<name>
 ```
 
@@ -43,7 +43,7 @@ and run `make test` after each:
 
 1. **Module path.** Change `module` in `go.mod` to your repository, for
    example `github.com/<you>/xcl-plugin-<name>`, then replace
-   `github.com/jumppad-labs/xcl-plugin-template` with it in every import
+   `github.com/jumppad-labs/xcl-plugin-template-go` with it in every import
    and in `.mockery.yml`.
 2. **Plugin name.** Set `PLUGIN` at the top of the `Makefile` to your
    repository's name. It names the binary and every release asset.
@@ -150,7 +150,7 @@ local.RegisterExternalPlugin(pluginBinary)
 ```
 
 `pluginBinary` is the path of the built program, for example
-`build/xcl-plugin-template`.
+`build/xcl-plugin-template-go`.
 
 ## The change decision
 
@@ -394,7 +394,7 @@ if err != nil {
 }
 
 gh := registry.NewGitHub(registry.GitHubTrustedKeys(string(publicKey)))
-gh.RegisterPlugin("jumppad-labs/xcl-plugin-template", "v0.1.0")
+gh.RegisterPlugin("jumppad-labs/xcl-plugin-template-go", "v0.1.0")
 ```
 
 ## Tools and why

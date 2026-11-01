@@ -10,7 +10,7 @@ import (
 
 	"github.com/jumppad-labs/xcl"
 
-	"github.com/jumppad-labs/xcl-plugin-template/entities"
+	"github.com/jumppad-labs/xcl-plugin-template-go/entities"
 )
 
 func TestInProcessAppliesPlansNoChangesAndDestroys(t *testing.T) {
