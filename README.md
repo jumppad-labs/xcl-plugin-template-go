@@ -342,8 +342,8 @@ holds:
 The parts of each name are separated with `-`, like the repository's name.
 xcl's GitHub registry also installs releases that use `_` throughout
 (`<PLUGIN>_0.1.0_index.xcl`), so change the separators in `make dist` if you
-prefer that. Installing a `-`-separated release needs an xcl newer than
-v0.13.0, which only finds `_`-separated indexes.
+prefer that. Installing a `-`-separated release needs xcl v0.13.1 or later;
+earlier versions only find `_`-separated indexes.
 
 To build the same release locally, unsigned:
 
